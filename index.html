@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>will you be my valentine? 💘</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- PAGE 0 – WILL YOU BE MY VALENTINE? (first click) -->
+<div id="pageValentine" class="page active">
+    <div class="valentine-question">
+        <div class="big-question">💘 will you be <br>my Valentine?</div>
+        <div class="button-pair">
+            <button class="yes-btn" id="yesValentine">YES</button>
+            <button class="no-btn" id="noValentine">no</button>
+        </div>
+        <div id="sadFaceArea" class="sad-face"></div>
+    </div>
+</div>
+
+<!-- PAGE 1 – MAIN HUB (after yes) -->
+<div id="pageHub" class="page">
+    <div class="nav-row">
+        <button class="back-btn" id="backFromHubToQuestion">←</button>
+        <span class="hub-icon">💫</span>
+    </div>
+    <h2>Mon cœur💝</h2>
+    <div class="photo-strip">
+        <img src="images/ohima (1).jpeg" alt="memory 1" class="hub-photo">
+        <img src="images/ohima (6).jpg" class="hub-photo">
+        <img src="images/ohima (1).jpg" class="hub-photo">
+    </div>
+    <p class="subtitle">Happy Valentine's Day Ohima💖</p>
+
+    <div class="hub-cards">
+        <div class="hub-card" data-page="reasons">
+            <span class="card-icon">🥰</span>
+            <div class="card-text"><h3>14 reasons</h3><p>why you're everything</p></div>
+        </div>
+        <div class="hub-card" data-page="surprise">
+            <span class="card-icon">🗺️</span>
+            <div class="card-text"><h3>memory game</h3><p>our little adventure</p></div>
+        </div>
+        <div class="hub-card" data-page="letters">
+            <span class="card-icon">💌</span>
+            <div class="card-text"><h3>open when ...</h3><p>5 unopened letters</p></div>
+        </div>
+        <div class="hub-card" data-page="gallery">
+            <span class="card-icon">📸</span>
+            <div class="card-text"><h3>your smile</h3><p>Best ones so far</p></div>
+        </div>
+    </div>
+</div>
+
+<!-- PAGE 2 – 14 REASONS -->
+<div id="pageReasons" class="page">
+    <div class="nav-row">
+        <button class="back-btn" data-back="hub">←</button>
+        <span>💞</span>
+    </div>
+    <h2>14 reasons</h2>
+    <div class="counter" id="reasonCounter">1 / 14 revealed</div>
+    <div class="reasons-grid" id="reasonsGrid"></div>
+    <button class="reveal-btn" id="revealOneMore">✨ reveal another</button>
+    <button class="action-btn hidden" id="revealAllBtn">💘 reveal all 14</button>
+</div>
+
+<!-- PAGE 3 – SURPRISE GAME -->
+<div id="pageSurprise" class="page">
+    <div class="nav-row">
+        <button class="back-btn" data-back="hub">←</button>
+        <span>🎮</span>
+    </div>
+    <h2>memory adventure</h2>
+    <div id="gameContainer" class="game-area">
+        <div id="gameStart">
+            <p style="margin: 25px 0;">ready for a tiny journey?</p>
+            <button class="action-btn" id="startGameBtn">begin →</button>
+        </div>
+        <div id="gamePlay" class="hidden">
+            <div id="questionBox" style="font-size:1.5rem; margin:15px 0;"></div>
+            <div id="optionsBox" class="options-box"></div>
+            <div id="gameProgress"></div>
+        </div>
+        <div id="gameEnd" class="hidden">
+            <h2>🎉 you did it!</h2>
+            <p style="margin:20px;">our story will keeps growing</p>
+            <div class="final-surprise">
+                <img src="images/ohima (3).jpg" style="width:100%; border-radius:50px;">
+                <p class="valentine-message" style="font-size:2rem;">forever my love</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PAGE 4 – OPEN WHEN LETTERS (redesigned: centered image, text top) -->
+<div id="pageLetters" class="page">
+    <div class="nav-row">
+        <button class="back-btn" data-back="hub">←</button>
+        <span>📬</span>
+    </div>
+    <h2>open when ...</h2>
+    <div class="letters-board" id="lettersBoard"></div>
+    <div id="letterDisplay" class="letter-content-pop hidden">
+        <button class="close-letter" id="closeLetterBtn">×</button>
+        <div id="letterText"></div>
+    </div>
+</div>
+
+<!-- PAGE 5 – GALLERY (redesigned: centered images, caption top) -->
+<div id="pageGallery" class="page">
+    <div class="nav-row">
+        <button class="back-btn" data-back="hub">←</button>
+        <span>🌅</span>
+    </div>
+    <h2>your smile</h2>
+    <div class="gallery-grid" id="galleryGrid"></div>
+    <!-- lightbox -->
+    <div id="lightbox" class="lightbox hidden" onclick="closeLightbox()">
+        <img id="expandedImg" src="">
+        <div id="caption"></div>
+    </div>
+</div>
+
+<!-- MESSAGE OVERLAY -->
+<div id="messageOverlay" class="message-overlay">
+    <div class="message-card">
+        <button class="close-message-btn" id="closeMessageBtn">×</button>
+        <div class="message-emoji" id="messageEmoji">💬</div>
+        <div class="message-text" id="messageContent">message</div>
+        <div class="message-hint" id="messageHint"></div>
+    </div>
+</div>
+
+<script src="script.js" defer></script>
+</body>
+</html>
