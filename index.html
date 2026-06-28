@@ -10,23 +10,42 @@
 </head>
 <body>
 
-<!-- ====== VALENTINE QUESTION PAGE ====== -->
-<div id="pageValentine" class="page active">
-  <div class="valentine-question">
-    <h1>💝</h1>
-    <div class="big-question">Will you be my Valentine?</div>
-    <div class="button-pair">
-      <button class="yes-btn" id="yesValentine">Yes! ❤️</button>
-      <button class="no-btn" id="noValentine">No 😢</button>
+<!-- ====== 🔒 LOCK SCREEN ====== -->
+<div id="lockScreen" class="lock-screen">
+  <div class="lock-glow"></div>
+  <div class="lock-container">
+    <div class="lock-logo">🤍</div>
+    <div class="lock-title">mon cœur</div>
+    <div class="lock-sub">our memories</div>
+    <div class="pin-dots" id="pinDots">
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
     </div>
-    <div class="sad-face" id="sadFaceArea"></div>
+    <div class="keypad" id="keypad">
+      <button class="key" data-k="1">1</button>
+      <button class="key" data-k="2">2</button>
+      <button class="key" data-k="3">3</button>
+      <button class="key" data-k="4">4</button>
+      <button class="key" data-k="5">5</button>
+      <button class="key" data-k="6">6</button>
+      <button class="key" data-k="7">7</button>
+      <button class="key" data-k="8">8</button>
+      <button class="key" data-k="9">9</button>
+      <button class="key" data-k="" style="background:transparent;box-shadow:none;cursor:default;"></button>
+      <button class="key" data-k="0">0</button>
+      <button class="key del" id="delKey">⌫</button>
+    </div>
+    <div class="pin-hint" id="pinHint">anniversary (6 digits)</div>
   </div>
 </div>
 
-<!-- ====== HUB PAGE ====== -->
+<!-- ====== HUB PAGE (locked behind PIN) ====== -->
 <div id="pageHub" class="page">
-  <div class="nav-row">
-    <button class="back-btn" id="backFromHubToQuestion">← back</button>
+  <div class="nav-row" style="justify-content:flex-end;">
     <span class="hub-icon">💕</span>
   </div>
   <h2>our little world</h2>
@@ -115,10 +134,6 @@
     <h2 style="margin:0;">open when…</h2>
   </div>
   <div class="letters-board" id="lettersBoard"></div>
-  <div id="letterDisplay" class="letter-content-pop hidden">
-    <button class="close-letter" id="closeLetterBtn">×</button>
-    <div id="letterText"></div>
-  </div>
 </div>
 
 <!-- ====== GALLERY ====== -->
@@ -131,7 +146,7 @@
 </div>
 
 <!-- ====== MEMORY VAULT ====== -->
-<div id="pageVault" class="page" style="display:none;"> <!-- hidden, will be shown via JS -->
+<div id="pageVault" class="page">
   <div class="nav-row">
     <button class="back-btn" data-back>←</button>
     <h2 style="margin:0;">memory vault</h2>
@@ -140,7 +155,7 @@
 </div>
 
 <!-- ====== ADD MEMORY ====== -->
-<div id="pageAdd" class="page" style="display:none;">
+<div id="pageAdd" class="page">
   <div class="nav-row">
     <button class="back-btn" data-back>←</button>
     <h2 style="margin:0;">add a memory</h2>
@@ -169,7 +184,6 @@
       <label class="form-label">what happened?</label>
       <textarea class="form-textarea" id="memNote" placeholder="describe the moment…"></textarea>
     </div>
-    <!-- NEW: image upload -->
     <div class="form-group">
       <label class="form-label">photo (optional)</label>
       <input type="file" id="memImage" accept="image/*" class="form-input" style="padding:8px;" />
@@ -181,7 +195,7 @@
   </div>
 </div>
 
-<!-- ====== MESSAGE OVERLAY (used for game & letters) ====== -->
+<!-- ====== GAME MESSAGE OVERLAY ====== -->
 <div id="messageOverlay" class="message-overlay">
   <div class="message-card">
     <button class="close-message-btn" id="closeMessageBtn">×</button>
@@ -191,7 +205,16 @@
   </div>
 </div>
 
-<!-- ====== LIGHTBOX (gallery) ====== -->
+<!-- ====== LETTERS DEDICATED MODAL ====== -->
+<div id="letterModal" class="message-overlay">
+  <div class="message-card">
+    <button class="close-message-btn" id="closeLetterModalBtn">×</button>
+    <div class="message-emoji">💌</div>
+    <div class="message-text" id="letterModalContent"></div>
+  </div>
+</div>
+
+<!-- ====== LIGHTBOX ====== -->
 <div id="lightbox" class="lightbox hidden" onclick="closeLightbox()">
   <img id="expandedImg" src="" alt="expanded" />
   <div id="caption" style="color:white; margin-top:16px; font-size:1.4rem;"></div>
@@ -203,4 +226,3 @@
 <script src="script.js"></script>
 </body>
 </html>
-

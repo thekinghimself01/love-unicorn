@@ -1,7 +1,6 @@
 (function() {
     // ----- navigation state -----
     const pages = {
-        valentine: document.getElementById('pageValentine'),
         hub: document.getElementById('pageHub'),
         reasons: document.getElementById('pageReasons'),
         surprise: document.getElementById('pageSurprise'),
@@ -17,37 +16,13 @@
         if (pageId === 'vault') renderVault();
     }
 
-    // back handlers
+    // back handlers (go to hub)
     document.querySelectorAll('.back-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             if (e.target.closest('[data-back]') || e.target.classList.contains('back-btn')) {
                 showPage('hub');
             }
         });
-    });
-    document.getElementById('backFromHubToQuestion').addEventListener('click', () => showPage('valentine'));
-
-    // ----- valentine yes/no joke -----
-    const yesBtn = document.getElementById('yesValentine');
-    const noBtn = document.getElementById('noValentine');
-    const sadArea = document.getElementById('sadFaceArea');
-    let noClickCount = 0;
-    noBtn.addEventListener('click', () => {
-        noClickCount++;
-        if (noClickCount === 1) sadArea.innerText = '🥺 please?';
-        else if (noClickCount === 2) sadArea.innerText = '😢💔';
-        else if (noClickCount === 3) sadArea.innerText = '😭😭 ok i\'ll wait';
-        else if (noClickCount === 4) { sadArea.innerText = '🙈 okay but you\'re missing out'; }
-        else {
-            sadArea.innerText = '😡 really, mon cœur';
-        }
-        noBtn.style.transform = `translateX(${Math.random()*20-10}px)`;
-    });
-    yesBtn.addEventListener('click', () => {
-        showPage('hub');
-        noClickCount = 0;
-        sadArea.innerText = '';
-        noBtn.style.transform = 'none';
     });
 
     // ----- hub cards open respective page
@@ -127,7 +102,7 @@
     const optionsBox = document.getElementById('optionsBox');
     const progress = document.getElementById('gameProgress');
 
-    // overlay elements
+    // overlay elements (for game only)
     const overlay = document.getElementById('messageOverlay');
     const msgEmoji = document.getElementById('messageEmoji');
     const msgContent = document.getElementById('messageContent');
@@ -198,7 +173,7 @@
         });
     }
 
-    // ----- OPEN WHEN LETTERS -----
+    // ----- OPEN WHEN LETTERS (dedicated modal, separate from game) -----
     const lettersData = [
         { type: 'miss', label: 'you miss me', content: `
             <p>My love,</p>
@@ -230,10 +205,31 @@
             <p>Thank you for choosing me. I love you.</p>
         `}
     ];
+
+    // Letters modal elements
+    const letterModal = document.getElementById('letterModal');
+    const letterModalContent = document.getElementById('letterModalContent');
+    const closeLetterModalBtn = document.getElementById('closeLetterModalBtn');
+
+    function openLetterModal(content) {
+        letterModalContent.innerHTML = content;
+        letterModal.classList.add('active');
+    }
+
+    function closeLetterModal() {
+        letterModal.classList.remove('active');
+    }
+
+    closeLetterModalBtn.addEventListener('click', closeLetterModal);
+    letterModal.addEventListener('click', (e) => {
+        if (e.target === letterModal) closeLetterModal();
+    });
+
+    // Render letters
     const board = document.getElementById('lettersBoard');
     function renderLetters() {
         board.innerHTML = '';
-        lettersData.forEach((l, idx) => {
+        lettersData.forEach((l) => {
             const env = document.createElement('div');
             env.className = 'letter-envelope';
             env.innerHTML = `
@@ -242,7 +238,7 @@
                 <span class="letter-status">unopened</span>
             `;
             env.addEventListener('click', () => {
-                showMessageOverlay(l.content, null, { emoji: '💌', hint: '' });
+                openLetterModal(l.content);
                 env.querySelector('.letter-status').innerText = 'opened ❤️';
                 env.classList.add('opened');
             });
@@ -250,9 +246,6 @@
         });
     }
     renderLetters();
-    document.getElementById('closeLetterBtn').addEventListener('click', () => {
-        document.getElementById('letterDisplay').classList.add('hidden');
-    });
 
     // ----- GALLERY -----
     const galleryGrid = document.getElementById('galleryGrid');
@@ -324,7 +317,7 @@
             return;
         }
         let html = '<div style="display:flex; flex-direction:column; gap:16px;">';
-        mems.forEach((m, idx) => {
+        mems.forEach((m) => {
             const dateStr = m.date ? new Date(m.date+'T12:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : 'a special day';
             html += `
                 <div style="background:white; border-radius:30px; padding:18px 20px; border:2px solid #ffe2e2; box-shadow:0 4px 12px rgba(170,80,90,0.1);">
@@ -353,7 +346,6 @@
             imageDataURL = null;
             return;
         }
-        // resize image before storing
         const reader = new FileReader();
         reader.onload = function(ev) {
             const img = new Image();
@@ -392,7 +384,7 @@
             date,
             note,
             tag,
-            image: imageDataURL || null,   // store resized image
+            image: imageDataURL || null,
             id: Date.now()
         });
         localStorage.setItem('memories', JSON.stringify(mems));
@@ -407,7 +399,6 @@
         const t = document.getElementById('toast');
         t.classList.add('show');
         setTimeout(() => t.classList.remove('show'), 2200);
-        // update vault if visible
         if (pages.vault.classList.contains('active')) renderVault();
     });
 
