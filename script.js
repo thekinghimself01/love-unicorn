@@ -6,12 +6,15 @@
         reasons: document.getElementById('pageReasons'),
         surprise: document.getElementById('pageSurprise'),
         letters: document.getElementById('pageLetters'),
-        gallery: document.getElementById('pageGallery')
+        gallery: document.getElementById('pageGallery'),
+        vault: document.getElementById('pageVault'),
+        add: document.getElementById('pageAdd')
     };
 
     function showPage(pageId) {
         Object.values(pages).forEach(p => p.classList.remove('active'));
         pages[pageId].classList.add('active');
+        if (pageId === 'vault') renderVault();
     }
 
     // back handlers
@@ -134,7 +137,6 @@
     let pendingNextQuestion = false;
     function showMessageOverlay(text, isCorrect, opts = {}) {
         msgEmoji.innerText = opts.emoji ?? (isCorrect ? '✨' : '💭');
-        // render HTML content (so <p> tags show correctly)
         msgContent.innerHTML = text;
         msgHint.innerText = (typeof opts.hint !== 'undefined') ? opts.hint : (isCorrect ? '· correct ·' : '');
         pendingNextQuestion = !!opts.nextOnClose;
@@ -187,7 +189,6 @@
                 
                 if (selected === currentQ.correct) {
                     e.target.classList.add('correct-guess');
-                    // show memory; advance to next question when user closes the popup
                     showMessageOverlay(currentQ.memory, true, { nextOnClose: true });
                 } else {
                     e.target.classList.add('wrong-guess');
@@ -197,7 +198,7 @@
         });
     }
 
-    // ----- OPEN WHEN LETTERS (centered image, text top) -----
+    // ----- OPEN WHEN LETTERS -----
     const lettersData = [
         { type: 'miss', label: 'you miss me', content: `
             <p>My love,</p>
@@ -205,9 +206,9 @@
             <p>Close your eyes for a second.<br>
             Imagine my arms around you.<br>
             Imagine the forehead kiss you always love.<br>
-            Imagine me saying softly, "Im right here, mon c5ur."<br>
-            Distance doesnt change what we are. Silence doesnt weaken us.<br>
-            If you miss me, it only means what we share is real. And I miss you too... 493</p>
+            Imagine me saying softly, "I'm right here, mon cœur."<br>
+            Distance doesn't change what we are. Silence doesn't weaken us.<br>
+            If you miss me, it only means what we share is real. And I miss you too... always.</p>
         `},
         { type: 'sad', label: 'bad day', content: `
             <p>Hey love,</p>
@@ -219,7 +220,7 @@
             <p>I see your light, your effort, and the growth. I am so proud of the person you are becoming, never shrink your glow.</p>
         `},
         { type: 'insecure', label: 'need reassurance', content: `
-            <p>Mon c3ur,</p>
+            <p>Mon cœur,</p>
             <p>If you ever doubt my love, let me be louder: I am here, fully and completely. You don't have to prove anything, you already have me.</p>
             <p>I love you.</p>
         `},
@@ -230,21 +231,17 @@
         `}
     ];
     const board = document.getElementById('lettersBoard');
-    const letterDisplay = document.getElementById('letterDisplay');
-    const letterText = document.getElementById('letterText');
     function renderLetters() {
         board.innerHTML = '';
         lettersData.forEach((l, idx) => {
             const env = document.createElement('div');
             env.className = 'letter-envelope';
-            // using emoji as centered image, label at top, status below
             env.innerHTML = `
                 <span class="envelope-icon">💌</span>
                 <span class="letter-label">${l.label}</span>
                 <span class="letter-status">unopened</span>
             `;
             env.addEventListener('click', () => {
-                // open as centered popup (reuse message overlay)
                 showMessageOverlay(l.content, null, { emoji: '💌', hint: '' });
                 env.querySelector('.letter-status').innerText = 'opened ❤️';
                 env.classList.add('opened');
@@ -254,19 +251,16 @@
     }
     renderLetters();
     document.getElementById('closeLetterBtn').addEventListener('click', () => {
-        letterDisplay.classList.add('hidden');
+        document.getElementById('letterDisplay').classList.add('hidden');
     });
 
-    // ----- GALLERY with centered images & caption on top -----
+    // ----- GALLERY -----
     const galleryGrid = document.getElementById('galleryGrid');
-    // images available in the images/ folder (selected from workspace)
     const galleryImages = [
         'ohima (1).jpeg', 'ohima (1).jpg', 'ohima (2).jpeg', 'ohima (2).jpg',
         'ohima (3).jpg', 'ohima (4).jpg', 'ohima (5).jpg', 'ohima (6).jpg',
         'ohima (7).jpg', 'ohima (8).jpg', 'ohima (9).jpg', 'ohima.png'
     ];
-
-    // friendly captions map for images
     const galleryCaptions = {
         'ohima (1).jpeg': 'You look like a queen',
         'ohima (1).jpg': 'See teeth',
@@ -282,7 +276,6 @@
         'ohima.png': 'Says it all'
     };
 
-    // pick N random unique images
     function pickRandom(arr, n) {
         const copy = arr.slice();
         for (let i = copy.length - 1; i > 0; i--) {
@@ -301,7 +294,6 @@
     galleryItems.forEach((item) => {
         const div = document.createElement('div');
         div.className = 'gallery-item';
-        // Caption first (order: -1 in css), image centered
         div.innerHTML = `
             <div class="photo-caption">${item.caption}</div>
             <img src="${item.src}" alt="memory">
@@ -319,7 +311,107 @@
         document.getElementById('lightbox').classList.add('hidden');
     };
 
-    // floating hearts
+    // ----- MEMORY VAULT with image support -----
+    function getMemories() {
+        return JSON.parse(localStorage.getItem('memories') || '[]');
+    }
+
+    function renderVault() {
+        const vaultContent = document.getElementById('vaultContent');
+        const mems = getMemories();
+        if (!mems.length) {
+            vaultContent.innerHTML = '<div style="text-align:center; padding:60px 20px; color:#b85763;">✨ no memories yet.<br>add your first one together.</div>';
+            return;
+        }
+        let html = '<div style="display:flex; flex-direction:column; gap:16px;">';
+        mems.forEach((m, idx) => {
+            const dateStr = m.date ? new Date(m.date+'T12:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : 'a special day';
+            html += `
+                <div style="background:white; border-radius:30px; padding:18px 20px; border:2px solid #ffe2e2; box-shadow:0 4px 12px rgba(170,80,90,0.1);">
+                    <div style="font-size:0.8rem; color:#b85763; text-transform:uppercase; letter-spacing:1px;">${dateStr}</div>
+                    <div style="font-size:1.3rem; font-weight:600; color:#b13e4b; margin:4px 0 8px;">${m.title}</div>
+                    ${m.note ? `<div style="color:#ac7b81; margin-bottom:8px;">${m.note}</div>` : ''}
+                    <div style="display:inline-block; background:#ffd9d9; padding:4px 14px; border-radius:30px; font-size:0.9rem; color:#a53f4d;">${m.tag}</div>
+                    ${m.image ? `<div style="margin-top:12px;"><img src="${m.image}" style="max-width:100%; max-height:200px; border-radius:20px; border:2px solid #ffe2e2;"></div>` : ''}
+                </div>
+            `;
+        });
+        html += '</div>';
+        vaultContent.innerHTML = html;
+    }
+
+    // ----- ADD MEMORY (with image resize & storage) -----
+    const memImageInput = document.getElementById('memImage');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    let imageDataURL = null;
+
+    memImageInput.addEventListener('change', function(e) {
+        const file = this.files[0];
+        if (!file) {
+            imagePreview.style.display = 'none';
+            imageDataURL = null;
+            return;
+        }
+        // resize image before storing
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const MAX = 400;
+                let width = img.width, height = img.height;
+                if (width > height) {
+                    if (width > MAX) { height = height * (MAX / width); width = MAX; }
+                } else {
+                    if (height > MAX) { width = width * (MAX / height); height = MAX; }
+                }
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                imageDataURL = dataUrl;
+                previewImg.src = dataUrl;
+                imagePreview.style.display = 'block';
+            };
+            img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+
+    document.getElementById('saveMemoryBtn').addEventListener('click', function() {
+        const title = document.getElementById('memTitle').value.trim();
+        const date = document.getElementById('memDate').value;
+        const note = document.getElementById('memNote').value.trim();
+        const tag = document.getElementById('memTag').value;
+        if (!title) { document.getElementById('memTitle').focus(); return; }
+        const mems = getMemories();
+        mems.unshift({
+            title,
+            date,
+            note,
+            tag,
+            image: imageDataURL || null,   // store resized image
+            id: Date.now()
+        });
+        localStorage.setItem('memories', JSON.stringify(mems));
+        // reset form
+        document.getElementById('memTitle').value = '';
+        document.getElementById('memDate').value = '';
+        document.getElementById('memNote').value = '';
+        memImageInput.value = '';
+        imagePreview.style.display = 'none';
+        imageDataURL = null;
+        // toast
+        const t = document.getElementById('toast');
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2200);
+        // update vault if visible
+        if (pages.vault.classList.contains('active')) renderVault();
+    });
+
+    // ----- floating hearts -----
     function addFloater() {
         const heart = document.createElement('div');
         heart.innerText = '❤️';
