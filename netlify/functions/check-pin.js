@@ -1,9 +1,3 @@
-// Netlify Function: checks the submitted PIN against an environment variable.
-// The real PIN never gets sent to the browser — only true/false comes back.
-//
-// Setup: in Netlify, go to Site configuration > Environment variables and add:
-//   Key:   LOCK_PIN
-//   Value: 050621   (or whatever 6-digit PIN you want)
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
