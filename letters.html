@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>open when… 💌</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div id="pageLetters" class="page active">
+  <div class="nav-row">
+    <a class="back-btn" href="index.html">←</a>
+    <h2 style="margin:0;">open when…</h2>
+  </div>
+  <div class="letters-board" id="lettersBoard"></div>
+</div>
+
+<!-- ====== LETTERS MODAL ====== -->
+<div id="letterModal" class="message-overlay">
+  <div class="message-card">
+    <button class="close-message-btn" id="closeLetterModalBtn">×</button>
+    <div class="message-emoji">💌</div>
+    <div class="message-text" id="letterModalContent"></div>
+  </div>
+</div>
+
+<script>
+(function() {
+    // Edit / add / remove letters freely here.
+    const lettersData = [
+        { label: 'you miss me', content: `
+            <p>My love,</p>
+            <p>If you are reading this, it means you feel that little ache in your chest that whispers my name.</p>
+            <p>Close your eyes for a second.<br>
+            Imagine my arms around you.<br>
+            Imagine the forehead kiss you always love.<br>
+            Imagine me saying softly, "I'm right here, mon cœur."<br>
+            Distance doesn't change what we are. Silence doesn't weaken us.<br>
+            If you miss me, it only means what we share is real. And I miss you too… always.</p>
+        `},
+        { label: 'bad day', content: `
+            <p>Hey love,</p>
+            <p>First of all, breathe. Bad days visit and then they leave, they don't define you.</p>
+            <p>You are not your mistakes. You are the strongest, kindest soul I know. If today feels heavy, let me carry part of it.</p>
+        `},
+        { label: 'need pride reminder', content: `
+            <p>Sometimes you forget how powerful you are.</p>
+            <p>I see your light, your effort, and the growth. I am so proud of the person you are becoming, never shrink your glow.</p>
+        `},
+        { label: 'need reassurance', content: `
+            <p>Mon cœur,</p>
+            <p>If you ever doubt my love, let me be louder: I am here, fully and completely. You don't have to prove anything, you already have me.</p>
+            <p>I love you.</p>
+        `},
+        { label: 'grateful for us', content: `
+            <p>My heart,</p>
+            <p>If you're reading this thinking about us, know that I am grateful for your laugh, your patience, your love.</p>
+            <p>Thank you for choosing me. I love you.</p>
+        `}
+    ];
+
+    const letterModal = document.getElementById('letterModal');
+    const letterModalContent = document.getElementById('letterModalContent');
+    const closeLetterModalBtn = document.getElementById('closeLetterModalBtn');
+
+    function openLetterModal(content) {
+        letterModalContent.innerHTML = content;
+        letterModal.classList.add('active');
+    }
+    function closeLetterModal() {
+        letterModal.classList.remove('active');
+    }
+    closeLetterModalBtn.addEventListener('click', closeLetterModal);
+    letterModal.addEventListener('click', (e) => {
+        if (e.target === letterModal) closeLetterModal();
+    });
+
+    const board = document.getElementById('lettersBoard');
+    lettersData.forEach((l) => {
+        const env = document.createElement('div');
+        env.className = 'letter-envelope';
+        env.innerHTML = `
+            <span class="envelope-icon">💌</span>
+            <span class="letter-label">${l.label}</span>
+            <span class="letter-status">unopened</span>
+        `;
+        env.addEventListener('click', () => {
+            openLetterModal(l.content);
+            env.querySelector('.letter-status').innerText = 'opened ❤️';
+        });
+        board.appendChild(env);
+    });
+})();
+</script>
+</body>
+</html>

@@ -1,10 +1,72 @@
 (function() {
+    let enteredPin = '';
+    let checking = false;
+    const lockScreen = document.getElementById('lockScreen');
+    const lockContainer = document.querySelector('.lock-container');
+    const pinDotEls = document.querySelectorAll('#pinDots .pin-dot');
+
+    function updatePinDots() {
+        pinDotEls.forEach((dot, i) => {
+            dot.classList.toggle('filled', i < enteredPin.length);
+            dot.classList.remove('error', 'success');
+        });
+    }
+
+    async function checkPin() {
+        if (enteredPin.length < 6 || checking) return;
+        checking = true;
+        let ok = false;
+        try {
+            const res = await fetch('/.netlify/functions/check-pin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pin: enteredPin })
+            });
+            const data = await res.json();
+            ok = !!data.ok;
+        } catch (e) {
+            // Network/server issue — treat as incorrect, don't unlock.
+            ok = false;
+        }
+
+        if (ok) {
+            pinDotEls.forEach(d => d.classList.add('success'));
+            setTimeout(() => lockScreen.classList.add('hidden'), 450);
+        } else {
+            pinDotEls.forEach(d => d.classList.add('error'));
+            lockContainer.classList.add('pin-shake');
+            setTimeout(() => {
+                lockContainer.classList.remove('pin-shake');
+                enteredPin = '';
+                updatePinDots();
+                checking = false;
+            }, 500);
+        }
+    }
+
+    document.querySelectorAll('#keypad .key[data-k]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const k = btn.dataset.k;
+            if (k === '' || enteredPin.length >= 6) return;
+            enteredPin += k;
+            updatePinDots();
+            checkPin();
+        });
+    });
+
+    const delKey = document.getElementById('delKey');
+    if (delKey) {
+        delKey.addEventListener('click', () => {
+            enteredPin = enteredPin.slice(0, -1);
+            updatePinDots();
+        });
+    }
+
     // ----- navigation state -----
     const pages = {
         hub: document.getElementById('pageHub'),
         reasons: document.getElementById('pageReasons'),
         surprise: document.getElementById('pageSurprise'),
-        letters: document.getElementById('pageLetters'),
         gallery: document.getElementById('pageGallery'),
         vault: document.getElementById('pageVault'),
         add: document.getElementById('pageAdd')
@@ -25,10 +87,14 @@
         });
     });
 
-    // ----- hub cards open respective page
+    // ----- hub cards open respective page (letters opens its own standalone file) -----
     document.querySelectorAll('.hub-card').forEach(card => {
         card.addEventListener('click', (e) => {
             const page = card.dataset.page;
+            if (page === 'letters') {
+                window.location.href = 'letters.html';
+                return;
+            }
             if (page) showPage(page);
         });
     });
@@ -173,79 +239,7 @@
         });
     }
 
-    // ----- OPEN WHEN LETTERS (dedicated modal, separate from game) -----
-    const lettersData = [
-        { type: 'miss', label: 'you miss me', content: `
-            <p>My love,</p>
-            <p>If you are reading this, it means you feel that little ache in your chest that whispers my name.</p>
-            <p>Close your eyes for a second.<br>
-            Imagine my arms around you.<br>
-            Imagine the forehead kiss you always love.<br>
-            Imagine me saying softly, "I'm right here, mon cœur."<br>
-            Distance doesn't change what we are. Silence doesn't weaken us.<br>
-            If you miss me, it only means what we share is real. And I miss you too... always.</p>
-        `},
-        { type: 'sad', label: 'bad day', content: `
-            <p>Hey love,</p>
-            <p>First of all, breathe. Bad days visit and then they leave, they don't define you.</p>
-            <p>You are not your mistakes. You are the strongest, kindest soul I know. If today feels heavy, let me carry part of it.</p>
-        `},
-        { type: 'proud', label: 'need pride reminder', content: `
-            <p>Sometimes you forget how powerful you are.</p>
-            <p>I see your light, your effort, and the growth. I am so proud of the person you are becoming, never shrink your glow.</p>
-        `},
-        { type: 'insecure', label: 'need reassurance', content: `
-            <p>Mon cœur,</p>
-            <p>If you ever doubt my love, let me be louder: I am here, fully and completely. You don't have to prove anything, you already have me.</p>
-            <p>I love you.</p>
-        `},
-        { type: 'grateful', label: 'grateful for us', content: `
-            <p>My heart,</p>
-            <p>If you're reading this thinking about us, know that I am grateful for your laugh, your patience, your love.</p>
-            <p>Thank you for choosing me. I love you.</p>
-        `}
-    ];
-
-    // Letters modal elements
-    const letterModal = document.getElementById('letterModal');
-    const letterModalContent = document.getElementById('letterModalContent');
-    const closeLetterModalBtn = document.getElementById('closeLetterModalBtn');
-
-    function openLetterModal(content) {
-        letterModalContent.innerHTML = content;
-        letterModal.classList.add('active');
-    }
-
-    function closeLetterModal() {
-        letterModal.classList.remove('active');
-    }
-
-    closeLetterModalBtn.addEventListener('click', closeLetterModal);
-    letterModal.addEventListener('click', (e) => {
-        if (e.target === letterModal) closeLetterModal();
-    });
-
-    // Render letters
-    const board = document.getElementById('lettersBoard');
-    function renderLetters() {
-        board.innerHTML = '';
-        lettersData.forEach((l) => {
-            const env = document.createElement('div');
-            env.className = 'letter-envelope';
-            env.innerHTML = `
-                <span class="envelope-icon">💌</span>
-                <span class="letter-label">${l.label}</span>
-                <span class="letter-status">unopened</span>
-            `;
-            env.addEventListener('click', () => {
-                openLetterModal(l.content);
-                env.querySelector('.letter-status').innerText = 'opened ❤️';
-                env.classList.add('opened');
-            });
-            board.appendChild(env);
-        });
-    }
-    renderLetters();
+    // ----- OPEN WHEN LETTERS now lives in letters.html -----
 
     // ----- GALLERY -----
     const galleryGrid = document.getElementById('galleryGrid');
@@ -305,8 +299,35 @@
     };
 
     // ----- MEMORY VAULT with image support -----
+    // 🤍 Hardcoded memories — edit titles/dates/notes freely, or delete entries you don't want.
+    // For a photo, drop the file in /images and set image: "images/yourfile.jpg"
+    const hardcodedMemories = [
+        {
+            title: "The day we met",
+            date: "2021-06-05",
+            note: "EDIT ME: write what happened the day it all started.",
+            tag: "first",
+            image: null
+        },
+        {
+            title: "Our anniversary",
+            date: "2021-07-25",
+            note: "EDIT ME: write about this milestone.",
+            tag: "milestone",
+            image: null
+        },
+        {
+            title: "EDIT ME: give this memory a title",
+            date: "",
+            note: "EDIT ME: describe the moment, then add as many more of these blocks as you like.",
+            tag: "everyday",
+            image: null
+        }
+    ];
+
     function getMemories() {
-        return JSON.parse(localStorage.getItem('memories') || '[]');
+        const saved = JSON.parse(localStorage.getItem('memories') || '[]');
+        return [...saved, ...hardcodedMemories];
     }
 
     function renderVault() {
